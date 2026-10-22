@@ -1,4 +1,4 @@
-import { openai } from '@ai-sdk/openai';
+import { google } from '@ai-sdk/google';
 import { streamObject } from 'ai';
 import { z } from 'zod';
 
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   const { prompt } = await req.json();
 
   const result = await streamObject({
-    model: openai('gpt-4o'),
+    model: google('gemini-1.5-pro'),
     schema: projectSchema,
     system: `Eres el motor interno de un Generador de Telegram Mini Apps. 
     REGLAS ESTRICTAS:
