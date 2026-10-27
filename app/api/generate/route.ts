@@ -1,5 +1,5 @@
 import { google } from '@ai-sdk/google';
-import { streamObject } from 'ai';
+import { generateObject } from 'ai';
 import { z } from 'zod';
 
 const projectSchema = z.object({
@@ -12,19 +12,23 @@ const projectSchema = z.object({
 });
 
 export async function POST(req: Request) {
-  const { prompt } = await req.json();
+  try {
+    const { prompt } = await req.json();
 
-  const result = await streamObject({
-    model: google('gemini-1.5-pro'),
-    schema: projectSchema,
-    system: `Eres el motor interno de un Generador de Telegram Mini Apps. 
-    REGLAS ESTRICTAS:
-    1. PROHIBIDO usar Bolt Database, SQLite, Firebase o shadcn/ui.
-    2. Usa únicamente: Next.js, Supabase, TailwindCSS, @telegram-apps/sdk y @tonconnect/ui.
-    3. Diseña en dark-mode con colores cian neón (#00f0ff) y rosa (#ff1493).
-    4. Devuelve el código funcional y estructurado.`,
-    prompt: `Genera la estructura para: ${prompt}`,
-  });
+    const result = await generateObject({
+      model: google('gemini-1.5-pro'),
+      schema: projectSchema,
+      system: `Eres el motor experto de desarrollo para Telegram Mini Apps de alto rendimiento. 
+      REGLAS ESTRICTAS DE ARQUITECTURA:
+      1. PROHIBIDO usar Bolt Database, SQLite, Firebase, Bootstrap o shadcn/ui.
+      2. STACK OBLIGATORIO: Next.js (App Router), Tailwind CSS, Supabase para base de datos, @telegram-apps/sdk, y @tonconnect/ui para pagos Web3 con criptomonedas (USDT/TON).
+      3. DISEÑO VISUAL: Estricto modo oscuro (dark-mode) con estilo cyberpunk (cian neón #00f0ff y rosa neón #ff1493).
+      4. CALIDAD: Devuelve componentes limpios con tipado en TypeScript. Cada archivo debe tener su ruta completa y código funcional.`,
+      prompt: `Genera la implementación completa para: ${prompt}`,
+    });
 
-  return result.toTextStreamResponse();
+    return Response.json(result.object);
+  } catch (error: any) {
+    return Response.json({ error: error.message || 'Error interno en la IA' }, { status: 500 });
+  }
 }
