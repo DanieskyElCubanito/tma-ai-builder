@@ -10,7 +10,8 @@ export async function POST(req: Request) {
     }
 
     const { text } = await generateText({
-      model: google('gemini-2.0-flash'),
+      // ¡Aquí está la magia! El modelo actualizado que pide Google
+      model: google('gemini-3.8-flash'),
       system: `Eres un generador experto de Telegram Mini Apps. 
       Devuelve la respuesta EXCLUSIVAMENTE en un objeto JSON válido (sin markdown ni comillas de bloque de código como \`\`\`json), con la estructura exacta:
       {
