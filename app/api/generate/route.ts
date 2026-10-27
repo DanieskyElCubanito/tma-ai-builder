@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const { prompt } = await req.json();
 
     const result = await generateObject({
-      model: google('gemini-1.5-pro'),
+      model: google('gemini-2.0-flash'),
       schema: projectSchema,
       system: `Eres el motor experto de desarrollo para Telegram Mini Apps de alto rendimiento. 
       REGLAS ESTRICTAS DE ARQUITECTURA:
