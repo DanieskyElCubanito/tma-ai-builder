@@ -1,7 +1,5 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// Usamos directamente la librería oficial de Google con tu clave de entorno
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY || '');
+import { google } from '@ai-sdk/google';
+import { generateText } from 'ai';
 
 export async function POST(req: Request) {
   try {
@@ -11,27 +9,24 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Falta el prompt' }, { status: 400 });
     }
 
-    // Usamos el modelo flash actual
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const { text } = await generateText({
+      model: google('gemini-2.0-flash'),
+      system: `Eres un generador experto de Telegram Mini Apps. 
+      Devuelve la respuesta EXCLUSIVAMENTE en un objeto JSON válido (sin markdown ni comillas de bloque de código como \`\`\`json), con la estructura exacta:
+      {
+        "files": [
+          {
+            "path": "app/page.tsx",
+            "content": "// código aquí en Next.js y Tailwind con estética cyberpunk cian/rosa"
+          }
+        ]
+      }`,
+      prompt: `Requerimiento del usuario: ${prompt}`,
+    });
 
-    const structuredPrompt = `Eres un generador experto de Telegram Mini Apps. 
-    Devuelve la respuesta EXCLUSIVAMENTE en formato JSON válido, sin bloques de código ni texto adicional, con la siguiente estructura exacta:
-    {
-      "files": [
-        {
-          "path": "app/page.tsx",
-          "content": "// código aquí en Next.js y Tailwind con estética cyberpunk cian/rosa"
-        }
-      ]
-    }
-    Requerimiento del usuario: ${prompt}`;
-
-    const result = await model.generateContent(structuredPrompt);
-    const responseText = result.response.text();
-
-    // Limpiamos posibles etiquetas markdown de los bloques de código que la IA suele poner
-    const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-    const data = JSON.parse(cleanJson);
+    // Limpieza de seguridad para asegurar que el texto sea un JSON parseable
+    const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+    const data = JSON.parse(cleanText);
 
     return Response.json(data);
   } catch (error: any) {
