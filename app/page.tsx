@@ -56,7 +56,7 @@ export default function BuilderPage() {
       <div className="w-1/3 border-r border-gray-800 flex flex-col p-6 bg-[#0a0f1d] shadow-2xl overflow-y-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-black tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#00f0ff] to-[#ff1493] drop-shadow-[0_0_10px_rgba(0,240,255,0.3)]">
-            ⚡️ TMA AI Builder
+            ⚡️ 🚀TMA AI Builder
           </h1>
           <p className="text-xs text-gray-400 mt-1">Motor de Telegram Mini Apps & Web3</p>
         </div>
