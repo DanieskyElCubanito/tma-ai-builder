@@ -5,7 +5,7 @@ import Editor from '@monaco-editor/react';
 
 interface GeneratedFile {
   path: string;
-  content: string;
+  content: string; 
 }
 
 export default function BuilderPage() {
