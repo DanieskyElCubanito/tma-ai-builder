@@ -1,11 +1,9 @@
-// Añadimos el alias genérico 'gemini-flash' que a veces salta las colas largas
+// Lista de modelos oficiales confirmados
 const MODELS = [
   'gemini-3.8-flash',
-  'gemini-3.1-pro-preview',
-  'gemini-flash'
+  'gemini-3.1-pro-preview'
 ];
 
-// Bajamos la espera a 800ms para que Vercel no cancele la petición por tiempo
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function POST(req: Request) {
@@ -35,7 +33,7 @@ Requerimiento: ${prompt}`;
     let lastError = 'Servidores de Google ocupados';
 
     for (const model of MODELS) {
-      for (let attempt = 1; attempt <= 2; attempt++) {
+      for (let attempt = 1; attempt <= 3; attempt++) {
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
           {
@@ -63,13 +61,13 @@ Requerimiento: ${prompt}`;
         const errMsg = result?.error?.message || `Error HTTP ${response.status}`;
         lastError = `[${model}] ${errMsg}`;
 
-        // Si el modelo no existe, pasamos rápido al siguiente
+        // Si el modelo no existe, rompemos el intento con este modelo
         if (response.status === 404) {
           break;
         }
 
-        // Si está en alta demanda, esperamos 800ms
-        await sleep(800);
+        // Esperamos 2 segundos antes de volver a intentar golpear la puerta de Google
+        await sleep(2000);
       }
     }
 
