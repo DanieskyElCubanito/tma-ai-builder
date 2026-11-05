@@ -5,7 +5,7 @@ import Editor from '@monaco-editor/react';
 
 interface GeneratedFile {
   path: string;
-  content: string; 
+  content: string;
 }
 
 export default function BuilderPage() {
@@ -14,6 +14,7 @@ export default function BuilderPage() {
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +57,35 @@ export default function BuilderPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleCopy = async () => {
+    const file = files.find((f) => f.path === activeFile);
+    if (!file || !file.content) return;
+    
+    try {
+      await navigator.clipboard.writeText(file.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      alert('Tu navegador no permite copiar automáticamente.');
+    }
+  };
+
+  const handleDownload = () => {
+    const file = files.find((f) => f.path === activeFile);
+    if (!file || !file.content) return;
+    
+    const blob = new Blob([file.content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    // Extrae solo el nombre del archivo (ej. page.tsx)
+    a.download = file.path.split('/').pop() || 'codigo.tsx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const currentCode =
@@ -148,7 +178,6 @@ export default function BuilderPage() {
           </button>
         </form>
 
-        {/* Caja de Error Detallada */}
         {errorMsg && (
           <div style={{
             marginTop: '14px',
@@ -164,7 +193,6 @@ export default function BuilderPage() {
           </div>
         )}
 
-        {/* Lista de Archivos */}
         {files.length > 0 && (
           <div style={{ marginTop: '16px' }}>
             <div style={{ fontSize: '12px', fontWeight: 700, color: '#00f0ff', marginBottom: '8px', textTransform: 'uppercase' }}>
@@ -211,15 +239,55 @@ export default function BuilderPage() {
           padding: '10px 14px',
           backgroundColor: '#070b19',
           borderBottom: '1px solid rgba(0, 240, 255, 0.2)',
-          fontSize: '12px',
-          fontFamily: 'monospace',
-          color: '#00f0ff',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '10px'
         }}>
-          <span>{activeFile ? `📁 ${activeFile}` : '💡 Selecciona un archivo para inspeccionar'}</span>
+          <span style={{ fontSize: '12px', fontFamily: 'monospace', color: '#00f0ff' }}>
+            {activeFile ? `📁 ${activeFile}` : '💡 Selecciona un archivo'}
+          </span>
+          
+          {/* Controles de Exportación */}
+          {activeFile && (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={handleCopy}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid #00f0ff',
+                  color: '#00f0ff',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase'
+                }}
+              >
+                {copied ? '¡Copiado! ✓' : 'Copiar'}
+              </button>
+              <button
+                onClick={handleDownload}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid #ff1493',
+                  color: '#ff1493',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase'
+                }}
+              >
+                Descargar
+              </button>
+            </div>
+          )}
         </div>
+        
         <div style={{ height: '400px', width: '100%' }}>
           <Editor
             height="100%"
