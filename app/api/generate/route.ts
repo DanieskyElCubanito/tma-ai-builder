@@ -1,8 +1,7 @@
+// Actualizamos a los modelos exactos que Google pide usar ahora
 const MODELS = [
-  'gemini-3.8-flash',
-  'gemini-3.8-pro',
-  'gemini-2.5-flash',
-  'gemini-2.5-pro'
+  'gemini-3.1-pro-preview', 
+  'gemini-3.8-flash'
 ];
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -33,7 +32,6 @@ Requerimiento: ${prompt}`;
 
     let lastError = 'Servidores ocupados';
 
-    // Probamos los modelos en orden; si uno está lleno (503 / 429), reintenta o salta al siguiente
     for (const model of MODELS) {
       for (let attempt = 1; attempt <= 2; attempt++) {
         const response = await fetch(
@@ -63,12 +61,10 @@ Requerimiento: ${prompt}`;
         const errMsg = result?.error?.message || `Error HTTP ${response.status}`;
         lastError = `[${model}] ${errMsg}`;
 
-        // Si el modelo no existe (404), saltamos de inmediato al siguiente modelo de la lista
         if (response.status === 404) {
           break;
         }
 
-        // Si está saturado (503 o "high demand"), esperamos 1.5 segundos y reintentamos
         await sleep(1500);
       }
     }
