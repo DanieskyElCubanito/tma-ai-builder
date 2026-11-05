@@ -2,7 +2,7 @@ export async function POST(req: Request) {
   try {
     const { prompt } = await req.json();
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-
+ 
     if (!apiKey) {
       return Response.json(
         { error: 'Falta la variable GOOGLE_GENERATIVE_AI_API_KEY en Vercel.' },
