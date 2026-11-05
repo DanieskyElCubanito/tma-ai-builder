@@ -1,9 +1,11 @@
-// Actualizamos a los modelos exactos que Google pide usar ahora
+// Añadimos el alias genérico 'gemini-flash' que a veces salta las colas largas
 const MODELS = [
-  'gemini-3.1-pro-preview', 
-  'gemini-3.8-flash'
+  'gemini-3.8-flash',
+  'gemini-3.1-pro-preview',
+  'gemini-flash'
 ];
 
+// Bajamos la espera a 800ms para que Vercel no cancele la petición por tiempo
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function POST(req: Request) {
@@ -30,7 +32,7 @@ Devuelve ÚNICAMENTE un objeto JSON válido con esta estructura exacta:
 }
 Requerimiento: ${prompt}`;
 
-    let lastError = 'Servidores ocupados';
+    let lastError = 'Servidores de Google ocupados';
 
     for (const model of MODELS) {
       for (let attempt = 1; attempt <= 2; attempt++) {
@@ -61,11 +63,13 @@ Requerimiento: ${prompt}`;
         const errMsg = result?.error?.message || `Error HTTP ${response.status}`;
         lastError = `[${model}] ${errMsg}`;
 
+        // Si el modelo no existe, pasamos rápido al siguiente
         if (response.status === 404) {
           break;
         }
 
-        await sleep(1500);
+        // Si está en alta demanda, esperamos 800ms
+        await sleep(800);
       }
     }
 
